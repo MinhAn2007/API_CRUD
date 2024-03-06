@@ -20,11 +20,6 @@ public class Controller {
     @Autowired
     private UserSerivce userSerivce;
 
-    @GetMapping("/findById/{id}")
-    public ResponseEntity<User> findById(@PathVariable Long id) {
-        Optional<User> optionalUser = userSerivce.findById(id);
-        return optionalUser.map(ResponseEntity::ok).orElseGet(
-                () -> new ResponseEntity<>(HttpStatus.NOT_FOUND));  }
     @GetMapping("/getAll")
     public ResponseEntity<List<User>> findAll(){
         return ResponseEntity.ok(userSerivce.findAll());
