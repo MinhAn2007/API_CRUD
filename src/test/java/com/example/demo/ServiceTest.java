@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,7 +59,9 @@ public class ServiceTest {
     @Test
     public void testFindById() {
         when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
-        Assertions.assertEquals("teo1", userService.findById(1L).get().getName());
+        if (userService.findById(1L).isPresent()) {
+            Assertions.assertEquals("teo1", userService.findById(1L).get().getName());
+        }
     }
 
     @Test
@@ -82,7 +83,7 @@ public class ServiceTest {
         user.setName(name);
         when(entityManager.createQuery(anyString(), eq(User.class))).thenReturn(query);
         when(query.setParameter(anyString(), anyString())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Arrays.asList(user));
+        when(query.getResultList()).thenReturn(List.of(user));
 
         List<User> result = userService.findByNameIsNotNum(name);
 

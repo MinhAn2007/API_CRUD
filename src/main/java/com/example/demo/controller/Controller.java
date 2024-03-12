@@ -3,23 +3,22 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.User;
 import com.example.demo.service.UserSerivce;
-import org.apache.coyote.Response;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("crud")
 @CrossOrigin(origins = "http://localhost:3000")
 public class Controller {
-    @Autowired
-    private UserSerivce userSerivce;
+    private final UserSerivce userSerivce;
+
+    public Controller(UserSerivce userSerivce) {
+        this.userSerivce = userSerivce;
+    }
 
     @GetMapping("/getAll")
     public ResponseEntity<List<User>> findAll() {
