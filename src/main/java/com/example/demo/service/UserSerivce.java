@@ -33,6 +33,7 @@ public class UserSerivce {
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
+
     public List<User> findByNameIsNotNum(String name) {
         if (name.matches(".*\\d.*")) {
             return Collections.emptyList();

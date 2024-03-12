@@ -25,6 +25,9 @@ public class Controller {
     }
     @PostMapping("/add")
     public ResponseEntity<User> add(@RequestBody User user){
+        if (!isValid(user)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
         return ResponseEntity.ok(userSerivce.add(user));
     }
     @PutMapping("/update")
@@ -41,5 +44,8 @@ public class Controller {
     public void delete(@PathVariable Long id){
         User findUser = userSerivce.findById(id).orElseThrow();
         userSerivce.delete(findUser);
+    }
+    private boolean isValid(User user) {
+        return user.getName().matches("[a-zA-Z]+") && user.getCompany().matches("[a-zA-Z]+");
     }
 }
