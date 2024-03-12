@@ -19,7 +19,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -69,6 +71,7 @@ public class ControllerTest {
 
 
     }
+
     @Test
     public void addThrowsErrorWhenInputIsInvalid() throws Exception {
         User user = new User(1L, "John", "Doe");
@@ -118,4 +121,28 @@ public class ControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    public void testDelete() throws Exception {
+        User userToDelete = new User(1L, "John", "Doe");
+        when(userSerivce.findById(1L)).thenReturn(Optional.of(userToDelete));
+
+        mockMvc.perform(delete("/crud/delete/1"))
+                .andExpect(status().isNoContent());
+
+        verify(userSerivce).delete(userToDelete);
+    }
+
+    @Test
+    public void testDeleteNotFound() throws Exception {
+        when(userSerivce.findById(anyLong())).thenReturn(Optional.empty());
+
+        mockMvc.perform(delete("/crud/delete/1"))
+                .andExpect(status().isNotFound());
+
+        verify(userSerivce, never()).delete(any(User.class));
+        verify(userSerivce).findById(1L);
+    }
+
+
 }
