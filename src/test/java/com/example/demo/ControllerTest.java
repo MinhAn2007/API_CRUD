@@ -2,22 +2,20 @@ package com.example.demo;
 
 import com.example.demo.controller.Controller;
 import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserSerivce;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,8 +28,7 @@ public class ControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    @Mock
-    private UserRepository userRepository;
+
     @MockBean
     private UserSerivce userSerivce;
 
@@ -60,7 +57,6 @@ public class ControllerTest {
 
         when(userSerivce.add(any(User.class))).thenReturn(user);
 
-        // Đảm bảo rằng dữ liệu đầu vào chỉ chứa chữ
         String content = "{ \"name\": \"John\", \"company\": \"Doe\" }";
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(content);
@@ -74,7 +70,7 @@ public class ControllerTest {
 
     }
     @Test
-    public void add_ThrowsErrorWhenInputIsInvalid() throws Exception {
+    public void addThrowsErrorWhenInputIsInvalid() throws Exception {
         User user = new User(1L, "John", "Doe");
 
         when(userSerivce.add(any(User.class))).thenReturn(user);
@@ -85,5 +81,41 @@ public class ControllerTest {
                         .content(invalidContent)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testUpdateValidUser() throws Exception {
+        User existingUser = new User(1L, "John", "Doe");
+        when(userSerivce.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userSerivce.update(any(User.class))).thenReturn(existingUser);
+
+        String content = "{\"id\": 1, \"name\": \"John\", \"company\": \"Doe\"}";
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/crud/update")
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testUpdateInvalidUser() throws Exception {
+        when(userSerivce.findById(2L)).thenReturn(Optional.empty());
+
+        String content = "{\"id\": 2, \"name\": \"John\", \"company\": \"Doe\"}";
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/crud/update")
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUpdateInvalidInput() throws Exception {
+        String content = "{\"name\": \"John\", \"company\": \"Doe\"}";
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/crud/update")
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }
